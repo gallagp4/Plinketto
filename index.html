@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falling Circle with Collisions</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Title!</h1>
+    <canvas id="world"></canvas>
+
+    <!-- Matter.js Physics Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script>
+        // Matter.js Module Aliases
+        const Engine = Matter.Engine,
+              Render = Matter.Render,
+              Runner = Matter.Runner,
+              Bodies = Matter.Bodies,
+              World = Matter.World,
+              Events = Matter.Events;
+
+        // Create the engine and world
+        const engine = Engine.create();
+        const world = engine.world;
+
+        // Get the canvas and set its size
+        const canvas = document.getElementById('world');
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        // Create the renderer
+        const render = Render.create({
+            canvas: canvas,
+            engine: engine,
+            options: {
+                width: width,
+                height: height,
+                wireframes: false, // for solid shapes
+                background: '#f0f0f0',
+            }
+        });
+        Render.run(render);
+
+        // Create the runner (the game loop)
+        const runner = Runner.create();
+        Runner.run(runner, engine);
+
+        // Ground
+        const ground = Bodies.rectangle(width / 2, height + 50, width, 100, { isStatic: true });
+        World.add(world, ground);
+
+        // Add some static obstacles
+        const shapes = [
+            Bodies.rectangle(200, height - 200, 300, 20, { isStatic: true, angle: Math.PI * 0.05 }),
+            Bodies.rectangle(600, height - 300, 300, 20, { isStatic: true, angle: -Math.PI * 0.05 }),
+            Bodies.rectangle(1000, height - 400, 300, 20, { isStatic: true, angle: Math.PI * 0.05 }),
+            Bodies.rectangle(300, height - 500, 10, 20, { isStatic: true }) ,
+            Bodies.rectangle(700, height - 100, 1000, 20, { isStatic: true }) 
+        ];
+        World.add(world, shapes);
+
+        // Function to add a falling circle
+        function spawnCircle(x, y) {
+            const circle = Bodies.circle(x, y, 15, { restitution: 0.6 });
+            World.add(world, circle);
+        }
+
+        // Event listener for clicks
+        document.addEventListener('click', (event) => {
+            const x = event.clientX;
+            const y = event.clientY;
+            spawnCircle(x, y);
+        });
+
+        // Update canvas size on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            render.options.width = window.innerWidth;
+            render.options.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
